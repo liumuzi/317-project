@@ -1,10 +1,16 @@
 
 package pkg;
 
+import java.nio.charset.Charset;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Random;
 
 public class Employer implements User {
 
@@ -78,16 +84,17 @@ public class Employer implements User {
             System.out.println("Please enter your ID.");
             String employerID = scanner.nextLine();
             
-            /*Chech whether the employerID exists*/
+            /*Check whether the employerID exists*/
             String getNumber = "SELECT * "
                     +"FROM Employer E "
                     +"WHERE E.Employer_ID = '%s';";
             
             getNumber = String.format(getNumber, employerID);
+            
             try {
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery(getNumber);
-                        if(rs.isBeforeFirst()){
+                        if(!rs.isBeforeFirst()){
                             System.out.println("Error: EmployerID not found");
                             return;
                         }
@@ -101,7 +108,7 @@ public class Employer implements User {
                         System.out.println("Please enter the required experience(Press enter to skip).");
                         String experience = scanner.nextLine();
                         int exp;
-                        if (experience == "")
+                        if ("".equals(experience))
                             exp = 0;
                         else
                             exp = Integer.parseInt(experience);
@@ -110,26 +117,45 @@ public class Employer implements User {
                         String query = "SELECT COUNT(*) "
                                 +"FROM Employee E "
                                 +"WHERE E.Skills LIKE '%" + title + "%' "
-                                +"AND E.Expected_Salary <=" + salary +"' "
-                                +"AND E.Experience >=" + exp+";";
-
+                                +"AND E.Expected_Salary <=" + salary 
+                                +" AND E.Experience >=" + exp+";";
+                        
                         ResultSet result = stmt.executeQuery(query); 
                         result.next();
                         if(result.getInt(1)==0){
                             System.out.println("Error: No satisfied empolyee");
                             return;
                         }
-                        String newPosition = "INSERT INTO Position "
-                                            +"VALUES(NULL,'"+ title + "',"
+                        else {
+                        	System.out.println(result.getInt(1)+" potential employees are found. The position recruitment is posted."); 
+                        }
+                        String AlphaString = "abcdefghijklmnopqrstuvwxyz";
+                        StringBuilder pID = new StringBuilder(6);
+                        boolean flag = false;
+                        ResultSet rsPList = stmt.executeQuery("SELECT Position_ID FROM Position");
+                        while(!flag) {
+	                        for (int i=0; i<6; i++) {
+	                        	int index = (int)(AlphaString.length()*Math.random());
+	                        	pID.append(AlphaString.charAt(index));
+	                        }
+	                        pID.toString();
+	                        while(rsPList.next()) {
+	                        	if(pID.equals(rsPList.getString(1)))
+	                        		break;
+	                        	flag = true;
+	                        }
+                        }
+                        String newPosition = "INSERT INTO Position (Position_ID, Position_title, Salary, Experience, Status, Employer_ID) "
+                                            +"VALUES('"+ pID +"','"+ title + "',"
                                             + salary + "," + exp + ",True,'" + employerID +"');" ;
+     
                         stmt.executeUpdate(newPosition);
-                         
-                        System.out.println(result.getInt(1)+" potential employees are found. The position recruitment is posted.");    
+                            
 		} catch (SQLException e) {
 			e.printStackTrace();
                         System.exit(0);
                         
-		}
+	}
             
         }
         
@@ -138,7 +164,7 @@ public class Employer implements User {
             System.out.println("Please enter your ID.");
             String employerID = scanner.nextLine();
             
-            /*Chech whether the employerID exists*/
+            /*Check whether the employerID exists*/
             String getNumber = "SELECT * "
                     +"FROM Employer E "
                     +"WHERE E.Employer_ID = '%s';";
@@ -170,37 +196,62 @@ public class Employer implements User {
                         }
                         
                         /*display the employees who are interested in a selected position*/
-                        System.out.println("Please pick one Position id.");
-                        String positionID = scanner.nextLine();
-                        
+                        boolean flag = false;
+                        ResultSet rsEmployee = null;
+                        String positionID = ""; 
+                        while(!flag) {
+                        System.out.println("Please pick one Position id (Enter 'back' to go back).");
+                        positionID = scanner.nextLine();
+                        if (positionID.equals("back"))
+                        	return;
                         String getEmployee = "SELECT * "
                                 + "FROM Employee E "
                                 +"WHERE E.Employee_ID IN ("
-                                +"SELECT E.Employee_ID "
+                                +"SELECT M.Employee_ID "
                                 +"FROM marked M "
                                 +"WHERE M.Position_ID = '" + positionID + "');";
                         
-                        ResultSet rsEmployee = stmt.executeQuery(getEmployee);
+                        rsEmployee = stmt.executeQuery(getEmployee);
                         if(!rsEmployee.isBeforeFirst()){
-                            System.out.println("No record is found");
-                            return;
+                            System.out.println("No record is found. Please try another Position.");
                         }
                         else{
+                        	flag = true;
+                        }
+                        }
                             System.out.println("The employees who mark interested in this position recruitments are:");
+                            System.out.println("Employer_ID, Name, Expected_Salary, Experience, Skils");
                             while(rsEmployee.next()){
                                 for (int i = 1; i < 6; i++)
                                     System.out.print(rsEmployee.getString(i)+"  ");
-                                
                                 System.out.println();
                             }
-                        }
-                        
+                        flag = false;
+                        String employeeID = "";
                         /*Pick one Employee*/
-                        System.out.println("Please pick one employee by Employee_ID.");
-                        String employeeID = scanner.nextLine();
-                        
+                            while (!flag) {
+                    			System.out.print("Please pick one employee by Employee_ID (Enter 'back' to go back):\n");
+                    			employeeID = scanner.nextLine();
+                    			if(employeeID.equals("back"))
+                    				return;
+                    			
+                    			try {
+                    				rsEmployee.beforeFirst();
+                    				while(rsEmployee.next()){
+                    					if(employeeID.equals(rsEmployee.getString("Employee_ID"))) {
+                    						flag= true;
+                    						break;
+                    					}
+                    				}
+                    				if(!flag)
+                    					System.out.print("Invalid Employee_ID! Please enter again.\n");
+                    			} catch (SQLException e) {
+                    				e.printStackTrace();
+                    				System.exit(0);
+                    			}
+                    		}
                         //arrange an interview and record the employee is interviewed
-                        String interview = "UPDATE marked SET status = True "
+                        String interview = "UPDATE marked SET Status = True "
                                 + "WHERE Position_ID = '" + positionID + "' "
                                 +"AND Employee_ID = '" + employeeID + "';";
                         stmt.executeUpdate(interview);
@@ -233,33 +284,46 @@ public class Employer implements User {
                             return;
                         }
                         
-                        //ask for employee id
-                        System.out.println("Please enter the Employee_ID you want to hire.");
-                        String employeeID = scanner.nextLine();
-                        
-                        //check whether the employee is suitable 
-                        String count = "SELECT M.Position_ID "
-                        +"FROM marked M, Position P "
-                        +"WHERE P.Position_ID = M.Position_ID AND P.Employer_ID = '%s' AND "
-                        + "M.Employee_ID = '%s'AND M.status = True;";
-            
-                        count = String.format(count, employerID, employeeID);
-                        ResultSet rsSuitable = stmt.executeQuery(count);
-                        
-                        if(!rsSuitable.isBeforeFirst()){
-                            System.out.println("Error: This employee is not suitable.");
-                            return;
-                        }
-                        // insert the employee into record (one question, what it applied for multi position in this company)
+                        //ask for employee id and check whether the employee is suitable 
+                        boolean flag = false;
+                        String employeeID = "";
+                        String countInitial = "SELECT M.Position_ID "
+                                +"FROM marked M, Position P "
+                                +"WHERE P.Position_ID = M.Position_ID AND P.Employer_ID = '%s' AND "
+                                + "M.Employee_ID = '%s'AND M.status = True;";
+                        ResultSet rsSuitable = null;
+                            while (!flag) {
+                    			System.out.print("Please enter the Employee_ID you want to hire.(Enter 'back' to go back):\n");
+                    			employeeID = scanner.nextLine();
+                    			if(employeeID.equals("back"))
+                    				return;
+                    			
+                    			try {
+                    				String count = String.format(countInitial, employerID, employeeID);
+                                    rsSuitable = stmt.executeQuery(count);
+                                    if(rsSuitable.isBeforeFirst()){
+                                        flag = true;
+                                    }
+                    				
+                    				if(!flag)
+                    					System.out.print("This employee is not suitable! Please enter again.\n");
+                    			} catch (SQLException e) {
+                    				e.printStackTrace();
+                    				System.exit(0);
+                    			}
+                            }
+                   
+                        // insert the employee into record (one question, what it applied for multiple position in this company)
                         rsSuitable.next();
                         String positionID = rsSuitable.getString(1);
                         
-                        DateFormat dateFormat = new SimpleDateFormat("YYYY-MM-DD");
-                        Date date = new Date();
+                        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("YYYY-MM-dd");
+                        LocalDate date = LocalDate.now();
  
+                        System.out.print(positionID);
                         String record = "INSERT INTO Employment_History "
-                                +"VALUES('"+ positionID + "', '" + employeeID + "', "
-                                + dateFormat.format(date) + ", NULL);"; 
+                                +"VALUES('"+ positionID + "', '" + employeeID + "', '"
+                                + dateFormat.format(date) + "', NULL);"; 
                         
                         //update the position information
                         String update = "UPDATE Position SET Status = False "
