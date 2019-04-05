@@ -84,11 +84,11 @@ public class Employee implements User {
 		/* Database operation */
 		String qry = "SELECT P.Position_ID, P.Position_Title, P.Salary, ER.Company, C.Size, C.Founded"
 				+ " FROM Position P, Employee EE, Employer ER, Company C"
-				+ " WHERE EE.Employee_ID = " + id
+				+ " WHERE EE.Employee_ID = '" + id + "'"
 				+ " AND P.Employer_ID = ER.Employer_ID"
 				+ " AND ER.Company = C.Company"
 				+ " AND P.Status = True"
-				+ " AND EE.Skills LIKE CONCAT('%;', P.Position_Title ,';%')"
+				+ " AND EE.Skills LIKE CONCAT('%', P.Position_Title ,'%')"
 				+ " AND P.Salary >= EE.Expected_Salary "
 				+ " AND EE.Experience >= P.Experience";
 		
@@ -97,8 +97,20 @@ public class Employee implements User {
 			ResultSet rs = stmt.executeQuery(qry); 
 		
 			/* Report results */
-			System.out.print("Your available positions are:\n"
-					+ "Position_ID, Position_Title, Salary, Company, Size, Founded\n");
+			if(rs.next()) {
+				System.out.print("Your available positions are:\n"
+						+ "Position_ID, Position_Title, Salary, Company, Size, Founded\n");
+				System.out.print(rs.getString("Position_ID")+", ");
+				System.out.print(rs.getString("Position_Title")+", ");
+				System.out.print(rs.getString("Salary")+", ");
+				System.out.print(rs.getString("Company")+", ");
+				System.out.print(rs.getString("Size")+", ");
+				System.out.print(rs.getString("Founded")+"\n");
+			}
+			else
+			{
+				System.out.print("No available position for employee " + id + "!\n");
+			}
 			while(rs.next()) {
 				System.out.print(rs.getString("Position_ID")+", ");
 				System.out.print(rs.getString("Position_Title")+", ");
