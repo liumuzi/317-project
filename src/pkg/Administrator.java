@@ -10,18 +10,34 @@ import java.util.Scanner;
 public class Administrator implements User {
 	@Override
 	public int askForOperation() {
-            System.out.println("Administrator, what would you like to do?");
-            System.out.println("1. Create tables");
-            System.out.println("2. Delete tables");
-            System.out.println("3. Load tables");
-            System.out.println("4. Check tables");
-            System.out.println("5. Go back");
-            System.out.println("Please enter [1-5].");
-            String adChoice = scanner.next();
-            int upper = 5;
-            selectionError(upper, adChoice);
-
-            return Integer.parseInt(adChoice);//TODO: 
+            boolean valid = false;
+            String adChoice;
+            int operationNum = 0;
+            
+            while(!valid){
+                System.out.println("Administrator, what would you like to do?");
+                System.out.println("1. Create tables");
+                System.out.println("2. Delete tables");
+                System.out.println("3. Load tables");
+                System.out.println("4. Check tables");
+                System.out.println("5. Go back");
+                System.out.println("Please enter [1-5].");
+                adChoice = scanner.nextLine();
+                System.out.println("adchoice: " + adChoice);
+                try{
+                    operationNum = Integer.parseInt(adChoice);
+                }catch (NumberFormatException e){
+                    System.out.print("[Error]: Invalid input! Please try again.\n");
+                    continue;
+                }if(operationNum < 1 || operationNum > 5){
+                    System.out.print("[Error]: Invalid input! Please try again.\n");
+                    continue;
+                }
+                
+                valid = true;
+            }
+            
+            return operationNum;
 	}
 
 	@Override
@@ -35,13 +51,13 @@ public class Administrator implements User {
                         deleteTables(con);
                         break;
                     case 3:
-                    {
-                        try {
-                            loadData(con);
-                        } catch (ParseException ex) {
-                            System.out.println("[Error]: " + ex);
+                        {
+                            try {
+                                loadData(con);
+                            } catch (ParseException ex) {
+                                System.out.println("[Error]: " + ex);
+                            }
                         }
-                    }
                         break;
                     case 4:
                         checkData(con);
@@ -49,7 +65,7 @@ public class Administrator implements User {
                     case 5:
                         return 1;
                    default:
-                        System.out.print("[Error] Invalid Operation NUmber!");
+                        System.out.print("[Error] Invalid Operation Number!");
                         System.exit(0);
             }
             return 0;
@@ -70,7 +86,7 @@ public class Administrator implements User {
                 }
             }
             if(result == false)
-                System.out.println("[Error]: Invalid input!!");
+                System.out.println("[Error]: Invalid input!");
             //System.out.println("result: " + result);
             return result;
         }
@@ -176,163 +192,170 @@ public class Administrator implements User {
     }
     
     public void loadData(Connection con) throws ParseException {
-        System.out.println("Please enter the folder path.");
-        String path = scanner.next();
-        //File folder = new File(path);
-        //System.out.print(folder+"\n");
-        System.out.print("Processing...");
         
+        boolean valid = false;
         // inset company files
-        try{
-            File companyFile = new File(path + "\\company.csv");
-            Scanner readCompanyFile = new Scanner(companyFile);
-            //System.out.println(readFile.next());
-            try{
-                PreparedStatement pstmtCompany = con.prepareStatement("insert ignore into Company values(?,?,?)");
-                //System.out.println("loading the company file");
-                while(readCompanyFile.hasNext()){
-                    String temp1 = readCompanyFile.nextLine();
-                    //System.out.println(temp1);
-                    String[] temp = temp1.split(",");
-                    if(temp.length == 3){
-                        pstmtCompany.setString(1, temp[0]);
-                        pstmtCompany.setInt(2, Integer.parseInt(temp[1]));
-                        pstmtCompany.setInt(3, Integer.parseInt(temp[2]));
-                    }
-                    pstmtCompany.execute();
-                }
-            }catch(SQLException e){
-                System.out.println("[Error occurs when loading the company file]: " + e);
-            }
-        } catch (FileNotFoundException ex) {
-            System.out.println();
-            System.out.println("[Error]: " + ex);
-        }
+        while(!valid){
+            System.out.println("Please enter the folder path.");
+            String path = scanner.next();
+            System.out.print("Processing...");  
         
-        // insert employee files 
-        try{
-            File employeeFile = new File(path + "\\employee.csv");
-            Scanner readEmployeeFile = new Scanner(employeeFile);
             try{
-                String query = "insert ignore into Employee values (?,?,?,?,?)";
-                PreparedStatement pstmtEmployee = con.prepareStatement(query);
-                while(readEmployeeFile.hasNext()){
-                    String temp1 = readEmployeeFile.nextLine();
-                    String[] temp = temp1.split(",");
-                    if(temp.length == 5){
-                        pstmtEmployee.setString(1, temp[0]);
-                        pstmtEmployee.setString(2, (temp[1]));
-                        pstmtEmployee.setInt(3, Integer.parseInt(temp[2]));
-                        pstmtEmployee.setInt(4, Integer.parseInt(temp[3]));
-                        pstmtEmployee.setString(5, (temp[4]));
-                    }
-                    pstmtEmployee.execute();
-                }
-            }catch(SQLException e){
-                System.out.println("[Error occurs when loading the employee file]: " + e);
-            }
-        }catch (FileNotFoundException ex) {
-            System.out.println();
-            System.out.println("[Error]: " + ex);
-        }
-        
-        // insert employer files
-        try{
-            File employerFile = new File(path + "\\employer.csv");
-            Scanner readEmployerFile = new Scanner(employerFile);
-            try{
-                String query = "insert ignore into Employer values(?,?,?)";
-                PreparedStatement pstmtEmployer = con.prepareStatement(query);
-                while(readEmployerFile.hasNext()){
-                    String temp1 = readEmployerFile.nextLine();
-                    String[] temp = temp1.split(",");
-                    if(temp.length == 3){
-                        pstmtEmployer.setString(1, temp[0]);
-                        pstmtEmployer.setString(2, temp[1]);
-                        pstmtEmployer.setString(3, temp[2]);
-                    }
-                    pstmtEmployer.execute();
-                }
-            }catch(SQLException e){
-                System.out.println("[Error occurs when loading the employer file]: " + e);
-            }
-        }catch (FileNotFoundException ex) {
-            System.out.println();
-            System.out.println("[Error]: " + ex);
-        }
-        
-        // insert Position files
-        try{
-            File positionFile = new File(path + "\\position.csv");
-            Scanner readPositionFile = new Scanner(positionFile);
-            try{
-                String query = "insert ignore into Position values(?,?,?,?,?,?)";
-                PreparedStatement pstmtPosition = con.prepareStatement(query);
-                while(readPositionFile.hasNext()){
-                    String temp1 = readPositionFile.nextLine();
-                    String[] temp = temp1.split(",");
-                    if(temp.length == 6){
-                        pstmtPosition.setString(1, temp[0]);
-                        pstmtPosition.setString(2, temp[1]);
-                        pstmtPosition.setInt(3, Integer.parseInt(temp[2]));
-                        pstmtPosition.setInt(4, Integer.parseInt(temp[3]));
-                        pstmtPosition.setString(5, temp[4]);
-                        pstmtPosition.setBoolean(6, Boolean.parseBoolean(temp[5]));
-                    }
-                    pstmtPosition.execute();
-                }
-            }catch(SQLException e){
-                System.out.println("[Error occurs when loading the position file]: " + e);
-            }
-        }catch (FileNotFoundException ex) {
-            System.out.println();
-            System.out.println("[Error]: " + ex);
-        }
-        
-        
-        // insert history files
-        try{
-            File historyFile = new File(path + "\\history.csv");
-            Scanner readHistoryFile = new Scanner(historyFile);
-            try{
-                String query = "insert ignore into Employment_History values (?,?,?,?)";
-                PreparedStatement pstmtHistory = con.prepareStatement(query);
-                while(readHistoryFile.hasNext()){
-                    String temp1 = readHistoryFile.nextLine();
-                    String[] temp = temp1.split(",");
-                    if(temp.length == 5){
-                        pstmtHistory.setString(1, temp[0]);
-                        pstmtHistory.setString(2, temp[2]);
-                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-                        if(!temp[3].equals("NULL")){
-                            java.util.Date start = format.parse(temp[3]);
-                            long startTime = start.getTime();
-                            //System.out.print("start: " + new java.sql.Date(startTime));
-                            pstmtHistory.setDate(3, new java.sql.Date(startTime));
+                File companyFile = new File(path + "\\company.csv");
+                Scanner readCompanyFile = new Scanner(companyFile);
+                //System.out.println(readFile.next());
+                try{
+                    PreparedStatement pstmtCompany = con.prepareStatement("insert ignore into Company values(?,?,?)");
+                    //System.out.println("loading the company file");
+                    while(readCompanyFile.hasNext()){
+                        String temp1 = readCompanyFile.nextLine();
+                        //System.out.println(temp1);
+                        String[] temp = temp1.split(",");
+                        if(temp.length == 3){
+                            pstmtCompany.setString(1, temp[0]);
+                            pstmtCompany.setInt(2, Integer.parseInt(temp[1]));
+                            pstmtCompany.setInt(3, Integer.parseInt(temp[2]));
                         }
-                        else{
-                            pstmtHistory.setNull(3, Types.DATE);
-                        }
-                        if(!temp[4].equals("NULL")){
-                            java.util.Date end = format.parse(temp[4]);
-                            long endTime = end.getTime();
-                            //System.out.println(" end: " + new java.sql.Date(endTime));
-                            pstmtHistory.setDate(4, new java.sql.Date(endTime));
-                        }
-                        else{
-                            pstmtHistory.setNull(4, Types.DATE);
-                        }
+                        pstmtCompany.execute();
                     }
-                    pstmtHistory.execute();
+                }catch(SQLException e){
+                    System.out.println("[Error occurs when loading the company file]: " + e);
                 }
-            }catch(SQLException e){
-                System.out.println("[Error occurs when loading the history file]: " + e);
+            } catch (FileNotFoundException ex) {
+                System.out.println();
+                System.out.println("[Error]: The input folder path does not exists." );
+                continue;
             }
-        }catch (FileNotFoundException ex) {
-            System.out.println();
-            System.out.println("[Error]: " + ex);
+
+            // insert employee files 
+            try{
+                File employeeFile = new File(path + "\\employee.csv");
+                Scanner readEmployeeFile = new Scanner(employeeFile);
+                try{
+                    String query = "insert ignore into Employee values (?,?,?,?,?)";
+                    PreparedStatement pstmtEmployee = con.prepareStatement(query);
+                    while(readEmployeeFile.hasNext()){
+                        String temp1 = readEmployeeFile.nextLine();
+                        String[] temp = temp1.split(",");
+                        if(temp.length == 5){
+                            pstmtEmployee.setString(1, temp[0]);
+                            pstmtEmployee.setString(2, (temp[1]));
+                            pstmtEmployee.setInt(3, Integer.parseInt(temp[2]));
+                            pstmtEmployee.setInt(4, Integer.parseInt(temp[3]));
+                            pstmtEmployee.setString(5, (temp[4]));
+                        }
+                        pstmtEmployee.execute();
+                    }
+                }catch(SQLException e){
+                    System.out.println("[Error occurs when loading the employee file]: " + e);
+                }
+            }catch (FileNotFoundException ex) {
+                //System.out.println();
+                System.out.println("[Error]: The input folder path does not exists." );
+                continue;
+            }
+
+            // insert employer files
+            try{
+                File employerFile = new File(path + "\\employer.csv");
+                Scanner readEmployerFile = new Scanner(employerFile);
+                try{
+                    String query = "insert ignore into Employer values(?,?,?)";
+                    PreparedStatement pstmtEmployer = con.prepareStatement(query);
+                    while(readEmployerFile.hasNext()){
+                        String temp1 = readEmployerFile.nextLine();
+                        String[] temp = temp1.split(",");
+                        if(temp.length == 3){
+                            pstmtEmployer.setString(1, temp[0]);
+                            pstmtEmployer.setString(2, temp[1]);
+                            pstmtEmployer.setString(3, temp[2]);
+                        }
+                        pstmtEmployer.execute();
+                    }
+                }catch(SQLException e){
+                    System.out.println("[Error occurs when loading the employer file]: " + e);
+                }
+            }catch (FileNotFoundException ex) {
+                //System.out.println();
+                System.out.println("[Error]: The input folder path does not exists." );
+                continue;
+            }
+
+            // insert Position files
+            try{
+                File positionFile = new File(path + "\\position.csv");
+                Scanner readPositionFile = new Scanner(positionFile);
+                try{
+                    String query = "insert ignore into Position values(?,?,?,?,?,?)";
+                    PreparedStatement pstmtPosition = con.prepareStatement(query);
+                    while(readPositionFile.hasNext()){
+                        String temp1 = readPositionFile.nextLine();
+                        String[] temp = temp1.split(",");
+                        if(temp.length == 6){
+                            pstmtPosition.setString(1, temp[0]);
+                            pstmtPosition.setString(2, temp[1]);
+                            pstmtPosition.setInt(3, Integer.parseInt(temp[2]));
+                            pstmtPosition.setInt(4, Integer.parseInt(temp[3]));
+                            pstmtPosition.setString(5, temp[4]);
+                            pstmtPosition.setBoolean(6, Boolean.parseBoolean(temp[5]));
+                        }
+                        pstmtPosition.execute();
+                    }
+                }catch(SQLException e){
+                    System.out.println("[Error occurs when loading the position file]: " + e);
+                }
+            }catch (FileNotFoundException ex) {
+                //System.out.println();
+                System.out.println("[Error]: The input folder path does not exists." );
+                continue;
+            }
+
+
+            // insert history files
+            try{
+                File historyFile = new File(path + "\\history.csv");
+                Scanner readHistoryFile = new Scanner(historyFile);
+                try{
+                    String query = "insert ignore into Employment_History values (?,?,?,?)";
+                    PreparedStatement pstmtHistory = con.prepareStatement(query);
+                    while(readHistoryFile.hasNext()){
+                        String temp1 = readHistoryFile.nextLine();
+                        String[] temp = temp1.split(",");
+                        if(temp.length == 5){
+                            pstmtHistory.setString(1, temp[0]);
+                            pstmtHistory.setString(2, temp[2]);
+                            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+                            if(!temp[3].equals("NULL")){
+                                java.util.Date start = format.parse(temp[3]);
+                                long startTime = start.getTime();
+                                //System.out.print("start: " + new java.sql.Date(startTime));
+                                pstmtHistory.setDate(3, new java.sql.Date(startTime));
+                            }
+                            else{
+                                pstmtHistory.setNull(3, Types.DATE);
+                            }
+                            if(!temp[4].equals("NULL")){
+                                java.util.Date end = format.parse(temp[4]);
+                                long endTime = end.getTime();
+                                //System.out.println(" end: " + new java.sql.Date(endTime));
+                                pstmtHistory.setDate(4, new java.sql.Date(endTime));
+                            }
+                            else{
+                                pstmtHistory.setNull(4, Types.DATE);
+                            }
+                        }
+                        pstmtHistory.execute();
+                    }
+                }catch(SQLException e){
+                    System.out.println("[Error occurs when loading the history file]: " + e);
+                }
+            }catch (FileNotFoundException ex) {
+               // System.out.println();
+                System.out.println("[Error]: The input folder path does not exists." );
+                continue;
+            }
+            valid = true;
         }
-        
         System.out.println("Data is loaded!");
     }
     
