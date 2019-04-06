@@ -6,6 +6,25 @@ import java.util.Scanner;
 public class Main {
 
 	public static void main(String[] args) {
+		
+		/* DATABASE CONNECTION */
+		String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/db18";
+		String dbUsername = "Group18";
+		String dbPassword = "CSCI3170G18";
+
+		Connection con = null;
+		try{
+			Class.forName("com.mysql.jdbc.Driver");
+			while(con == null)
+				con = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
+		}catch (ClassNotFoundException e){
+			System.out.println("[Error]: Java MySQL DB Driver not found!!");
+			System.exit(0);
+		}catch (SQLException e){
+			System.out.println(e);
+		}
+		
+		
 		while(true){
 			/* WELCOME INTERFACE */
 			User user = null;
@@ -35,29 +54,14 @@ public class Main {
 					case "4":
 						/* Exit */
 						inputValid = true;
-						System.out.print("System exited.");
 						scanner.close();
+						System.out.print("System exited.");
 						System.exit(0);
 					default:
 						System.out.print("Invalid input! Please enter again:\n");
 				}
 			}
 			
-			/* DATABASE CONNECTION */
-			String dbAddress = "jdbc:mysql://projgw.cse.cuhk.edu.hk:2633/db18";
-			String dbUsername = "Group18";
-			String dbPassword = "CSCI3170G18";
-	
-			Connection con = null;
-			try{
-				Class.forName("com.mysql.jdbc.Driver");
-				con = DriverManager.getConnection(dbAddress, dbUsername, dbPassword);
-			}catch (ClassNotFoundException e){
-				System.out.println("[Error]: Java MySQL DB Driver not found!!");
-				System.exit(0);
-			}catch (SQLException e){
-				System.out.println(e);
-			}
 			
 			/* OPERATIONS */
 			int goBack = 0;
@@ -65,6 +69,7 @@ public class Main {
 				int operation = user.askForOperation();
 				goBack = user.executeOperation(operation, con);
 			}
+		
 		}
 	}
 }

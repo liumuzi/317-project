@@ -64,8 +64,7 @@ public class Employee implements User {
 
 	@Override
 	public void close() {
-		// TODO Auto-generated method stub
-		
+		scanner.close();
 	}
 	
 	void showAvailablePositions(Connection con) {
@@ -120,7 +119,6 @@ public class Employee implements User {
 	}
 
 	void markPosition(Connection con) {
-            //TODO: mark available 
 		/* Require & check user information */
 		System.out.print("Please enter your ID:\n");
 		String id = scanner.nextLine();
@@ -132,16 +130,23 @@ public class Employee implements User {
 		
 		/* 1. Search for positions that user may be interested */
 		String qry = "SELECT P.Position_ID, P.Position_Title, P.Salary, ER.Company, C.Size, C.Founded"
-				+ " FROM Position P, Employer ER, Company C"
+				+ " FROM Position P, Employee EE, Employer ER, Company C"
 				+ " WHERE P.Employer_ID = ER.Employer_ID"
+				+ " AND EE.Employee_ID = '" + id + "'"
 				+ " AND ER.Company = C.Company"
+				/* -----available----- */
 				+ " AND P.Status = True"
+				+ " AND EE.Skills LIKE CONCAT('%', P.Position_Title ,'%')"
+				+ " AND P.Salary >= EE.Expected_Salary "
+				+ " AND EE.Experience >= P.Experience"
+				/* -----not history company----- */
 				+ " AND C.Company NOT IN "
 					+ "(SELECT ER2.Company"
 					+ " FROM Position P2, Employer ER2, Employment_History H"
 					+ " WHERE P2.Employer_ID = ER2.Employer_ID"
 					+ " AND H.Position_ID = P2.Position_ID"
 					+ " AND H.Employee_ID = '"+ id +"')"
+				/* -----not marked----- */
 				+ " AND P.Position_ID NOT IN "
 					+ "(SELECT M.Position_ID"
 					+ " FROM marked M"
