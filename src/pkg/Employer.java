@@ -2,16 +2,9 @@
 package pkg;
 
 import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
-import java.nio.charset.Charset;
 import java.sql.*;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
 
 public class Employer implements User {
 
@@ -321,7 +314,14 @@ public class Employer implements User {
                         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("YYYY-MM-dd");
                         LocalDate date = LocalDate.now();
  
-                       
+                       //check duplicate
+                       String duplicate = "SELECT * FROM Employment_History WHERE Position_ID = '"
+                               + positionID +"';";
+                       ResultSet rsdp = stmt.executeQuery(duplicate);
+                        if(rsdp.isBeforeFirst()){
+                            System.out.println("[Error] Employee has already been hired!");
+                            return;
+                        }
                         String record = "INSERT INTO Employment_History (Position_ID, Employee_ID, Start, End) "
                                 +"VALUES('"+ positionID + "', '" + employeeID + "', '"
                                 + dateFormat.format(date) + "', NULL);"; 
@@ -344,7 +344,6 @@ public class Employer implements User {
                         while(rsInfo.next()){
                             for (int i = 1; i < 6; i++)
                                 System.out.print(rsInfo.getString(i)+"  ");
-                                //check duplicate
                             System.out.println();
                         }
                 } catch (MySQLIntegrityConstraintViolationException e1){
