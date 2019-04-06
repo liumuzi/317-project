@@ -1,6 +1,7 @@
 
 package pkg;
 
+import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import java.nio.charset.Charset;
 import java.sql.*;
 import java.text.DateFormat;
@@ -188,7 +189,7 @@ public class Employer implements User {
                             return;
                         }
                         else{
-                            rsPosition.next();
+//                            rsPosition.next();
                             System.out.println("The id of position recruitments posted by you are:");
                             while(rsPosition.next()){
                                 System.out.println(rsPosition.getString(1));
@@ -320,11 +321,11 @@ public class Employer implements User {
                         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("YYYY-MM-dd");
                         LocalDate date = LocalDate.now();
  
-                        System.out.print(positionID);
-                        String record = "INSERT INTO Employment_History "
+                       
+                        String record = "INSERT INTO Employment_History (Position_ID, Employee_ID, Start, End) "
                                 +"VALUES('"+ positionID + "', '" + employeeID + "', '"
                                 + dateFormat.format(date) + "', NULL);"; 
-                        
+                         System.out.print(record);
                         //update the position information
                         String update = "UPDATE Position SET Status = False "
                                 + "WHERE Position_ID = '" + positionID + "';";
@@ -339,13 +340,18 @@ public class Employer implements User {
                         ResultSet rsInfo = stmt.executeQuery(display);
                         
                         System.out.println("An Employment History record is created, details are:");
+                        System.out.println("Employee_ID, Company, Position_ID, Start, End");
                         while(rsInfo.next()){
                             for (int i = 1; i < 6; i++)
                                 System.out.print(rsInfo.getString(i)+"  ");
-                                
+                                //check duplicate
                             System.out.println();
                         }
-                } catch (SQLException e) {
+                } catch (MySQLIntegrityConstraintViolationException e1){
+                    System.out.println("[Error] Employee has already been hired!");
+                    return;
+                }
+            catch (SQLException e) {
                         e.printStackTrace();
                         System.exit(0);
                         

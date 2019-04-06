@@ -21,7 +21,7 @@ public class Administrator implements User {
             int upper = 5;
             selectionError(upper, adChoice);
 
-            return Integer.parseInt(adChoice);
+            return Integer.parseInt(adChoice);//TODO: 
 	}
 
 	@Override
@@ -46,6 +46,8 @@ public class Administrator implements User {
                     case 4:
                         checkData(con);
                         break;
+                    case 5:
+                        return 1;
                    default:
                         System.out.print("[Error] Invalid Operation NUmber!");
                         System.exit(0);

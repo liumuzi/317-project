@@ -120,6 +120,7 @@ public class Employee implements User {
 	}
 
 	void markPosition(Connection con) {
+            //TODO: mark available 
 		/* Require & check user information */
 		System.out.print("Please enter your ID:\n");
 		String id = scanner.nextLine();
