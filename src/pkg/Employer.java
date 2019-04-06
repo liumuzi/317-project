@@ -181,7 +181,7 @@ public class Employer implements User {
                         /*display the position posted by this id*/
                         String getPosition = "SELECT P.Position_ID "
                                 +"FROM Position P "
-                                +"WHERE P.Employer_ID = '" + employerID + "';";
+                                +"WHERE P.Employer_ID = '" + employerID + "' AND P.Status = True;";
                         ResultSet rsPosition = stmt.executeQuery(getPosition);
                         if(!rsPosition.isBeforeFirst()){
                             System.out.println("No record is found");
