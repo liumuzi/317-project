@@ -51,13 +51,7 @@ public class Administrator implements User {
                         deleteTables(con);
                         break;
                     case 3:
-                        {
-                            try {
-                                loadData(con);
-                            } catch (ParseException ex) {
-                                System.out.println("[Error]: " + ex);
-                            }
-                        }
+                        loadData(con);
                         break;
                     case 4:
                         checkData(con);
@@ -191,13 +185,13 @@ public class Administrator implements User {
         
     }
     
-    public void loadData(Connection con) throws ParseException {
+    public void loadData(Connection con){
         
         boolean valid = false;
-        // inset company files
+        // insert company files
         while(!valid){
             System.out.println("Please enter the folder path.");
-            String path = scanner.next();
+            String path = scanner.nextLine();
             System.out.print("Processing...");  
         
             try{
@@ -326,7 +320,12 @@ public class Administrator implements User {
                             pstmtHistory.setString(2, temp[2]);
                             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
                             if(!temp[3].equals("NULL")){
-                                java.util.Date start = format.parse(temp[3]);
+                                java.util.Date start = null;
+								try {
+									start = format.parse(temp[3]);
+								} catch (ParseException e) {
+									e.printStackTrace();
+								}
                                 long startTime = start.getTime();
                                 //System.out.print("start: " + new java.sql.Date(startTime));
                                 pstmtHistory.setDate(3, new java.sql.Date(startTime));
@@ -335,7 +334,13 @@ public class Administrator implements User {
                                 pstmtHistory.setNull(3, Types.DATE);
                             }
                             if(!temp[4].equals("NULL")){
-                                java.util.Date end = format.parse(temp[4]);
+                                java.util.Date end = null;
+								try {
+									end = format.parse(temp[4]);
+								} catch (ParseException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
                                 long endTime = end.getTime();
                                 //System.out.println(" end: " + new java.sql.Date(endTime));
                                 pstmtHistory.setDate(4, new java.sql.Date(endTime));
