@@ -325,7 +325,6 @@ public class Employer implements User {
                         String record = "INSERT INTO Employment_History (Position_ID, Employee_ID, Start, End) "
                                 +"VALUES('"+ positionID + "', '" + employeeID + "', '"
                                 + dateFormat.format(date) + "', NULL);"; 
-                         System.out.print(record);
                         //update the position information
                         String update = "UPDATE Position SET Status = False "
                                 + "WHERE Position_ID = '" + positionID + "';";

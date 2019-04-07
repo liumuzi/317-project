@@ -23,7 +23,6 @@ public class Administrator implements User {
                 System.out.println("5. Go back");
                 System.out.println("Please enter [1-5].");
                 adChoice = scanner.nextLine();
-                System.out.println("adchoice: " + adChoice);
                 try{
                     operationNum = Integer.parseInt(adChoice);
                 }catch (NumberFormatException e){
