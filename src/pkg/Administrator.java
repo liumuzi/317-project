@@ -189,7 +189,7 @@ public class Administrator implements User {
         boolean valid = false;
         // insert company files
         while(!valid){
-            System.out.println("Please enter the folder path.");
+            System.out.println("Please enter the folder path(absolute path).");
             String path = scanner.nextLine();
             System.out.print("Processing...");  
         

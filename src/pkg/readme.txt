@@ -8,7 +8,7 @@ GOU Jing          1155076839
 
 
 METHODS OF COMPILATION 
-javac -cp “.;path/to/connector.jar” *.java
+javac *.java
 
 METHODS OF EXECUTION
-java -cp “.;path/to/connector.jar” pkg.Main
+java -cp .;path/to/connector.jar pkg.Main
