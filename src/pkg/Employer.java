@@ -1,7 +1,7 @@
 
 package pkg;
 
-import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
+//import com.mysql.jdbc.exceptions.MySQLIntegrityConstraintViolationException;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -346,15 +346,15 @@ public class Employer implements User {
                                 System.out.print(rsInfo.getString(i)+"  ");
                             System.out.println();
                         }
-                } catch (MySQLIntegrityConstraintViolationException e1){
+                } catch (Exception e1){
                     System.out.println("[Error] Employee has already been hired!");
                     return;
                 }
-            catch (SQLException e) {
-                        e.printStackTrace();
-                        System.exit(0);
-                        
-		}
+//            catch (SQLException e) {
+//                        e.printStackTrace();
+//                        System.exit(0);
+//                        
+//		}
         }
 }
 
